@@ -34,6 +34,11 @@ bool PathLongerOnApproach::isPathUpdated(
   nav_msgs::msg::Path & new_path,
   nav_msgs::msg::Path & old_path)
 {
+  if ((old_path.poses.size() != 0 &&
+         new_path.poses.size() != 0 && old_path.poses.back() != new_path.poses.back())) {
+    std::cout << "old last pose == new last pose" << std::endl;
+  }
+
   return new_path != old_path && old_path.poses.size() != 0 &&
          new_path.poses.size() != 0 &&
          old_path.poses.back() == new_path.poses.back();
@@ -72,7 +77,7 @@ inline BT::NodeStatus PathLongerOnApproach::tick()
 
   // Check if the path is updated and valid, compare the old and the new path length,
   // given the goal proximity and check if the new path is longer
-  if (isPathUpdated(new_path_, old_path_) && isRobotInGoalProximity(old_path_, prox_len_) &&
+  if (isRobotInGoalProximity(old_path_, prox_len_) &&
     isNewPathLonger(new_path_, old_path_, length_factor_) && !first_time_)
   {
     const BT::NodeStatus child_state = child_node_->executeTick();
