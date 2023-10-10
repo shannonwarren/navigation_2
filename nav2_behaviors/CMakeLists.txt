@@ -55,6 +55,14 @@ ament_target_dependencies(nav2_spin_behavior
   ${dependencies}
 )
 
+add_library(nav2_strafe_behavior SHARED
+  plugins/strafe.cpp
+)
+
+ament_target_dependencies(nav2_strafe_behavior
+  ${dependencies}
+)
+
 add_library(nav2_wait_behavior SHARED
 plugins/wait.cpp
 )
@@ -117,6 +125,7 @@ install(TARGETS ${library_name}
                 nav2_assisted_teleop_behavior
                 nav2_drive_on_heading_behavior
                 nav2_back_up_behavior
+                nav2_strafe_behavior
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin
@@ -152,6 +161,7 @@ ament_export_libraries(${library_name}
   nav2_assisted_teleop_behavior
   nav2_drive_on_heading_behavior
   nav2_back_up_behavior
+  nav2_strafe_behavior
 )
 ament_export_dependencies(${dependencies})
 ament_package()

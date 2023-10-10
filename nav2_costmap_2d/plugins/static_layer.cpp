@@ -284,8 +284,6 @@ StaticLayer::incomingMap(const nav_msgs::msg::OccupancyGrid::SharedPtr new_map)
     map_received_ = true;
     return;
   }
-  std::lock_guard<Costmap2D::mutex_t> guard(*getMutex());
-  map_buffer_ = new_map;
 }
 
 void
