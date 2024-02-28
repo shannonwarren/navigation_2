@@ -69,7 +69,7 @@ public:
     getInput("service_name", service_name_);
     service_client_ = node_->create_client<ServiceT>(
       service_name_,
-      rclcpp::SystemDefaultsQoS(),
+      rmw_qos_profile_services_default,
       callback_group_);
 
     // Make a request for the service without parameter
@@ -81,12 +81,12 @@ public:
       service_name_.c_str());
     if (!service_client_->wait_for_service(wait_for_service_timeout_)) {
       RCLCPP_ERROR(
-        node_->get_logger(), "\"%s\" service server not available after waiting for 1 s",
-        service_node_name.c_str());
+        node_->get_logger(), "\"%s\" service server on \"%s\" not available after waiting for 5 s",
+        service_node_name.c_str(), service_name_.c_str());
       throw std::runtime_error(
               std::string(
                 "Service server %s not available",
-                service_node_name.c_str()));
+                service_name_.c_str()));
     }
 
     RCLCPP_DEBUG(
