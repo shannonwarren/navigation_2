@@ -71,6 +71,8 @@ NavigateToPoseNavigator::getDefaultBTFilepath(
 
   node->get_parameter("default_nav_to_pose_bt_xml", default_bt_xml_filename);
 
+  default_bt_xml_filename_ = default_bt_xml_filename;
+
   return default_bt_xml_filename;
 }
 
@@ -94,6 +96,7 @@ NavigateToPoseNavigator::goalReceived(ActionT::Goal::ConstSharedPtr goal)
     return false;
   }
 
+  RCLCPP_INFO(logger_, "BT loaded: %s", bt_xml_filename.empty() ? default_bt_xml_filename_.c_str() : bt_xml_filename.c_str());
   return initializeGoalPose(goal);
 }
 

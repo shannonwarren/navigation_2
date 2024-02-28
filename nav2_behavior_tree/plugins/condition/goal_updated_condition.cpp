@@ -14,6 +14,7 @@
 
 #include <string>
 #include <vector>
+#include <rclcpp/logging.hpp>
 #include "nav2_behavior_tree/plugins/condition/goal_updated_condition.hpp"
 #include "nav2_behavior_tree/bt_utils.hpp"
 
@@ -28,9 +29,11 @@ GoalUpdatedCondition::GoalUpdatedCondition(
 
 BT::NodeStatus GoalUpdatedCondition::tick()
 {
-  if (status() == BT::NodeStatus::IDLE) {
+  if (not initialized_) {
     BT::getInputOrBlackboard("goals", goals_);
     BT::getInputOrBlackboard("goal", goal_);
+    initialized_ = true;
+    RCLCPP_INFO(rclcpp::get_logger("GoalUpdated"), "Initialized.");
     return BT::NodeStatus::FAILURE;
   }
 
@@ -42,6 +45,7 @@ BT::NodeStatus GoalUpdatedCondition::tick()
   if (goal_ != current_goal || goals_ != current_goals) {
     goal_ = current_goal;
     goals_ = current_goals;
+    RCLCPP_INFO(rclcpp::get_logger("GoalUpdated"), "Goal was updated!");
     return BT::NodeStatus::SUCCESS;
   }
 

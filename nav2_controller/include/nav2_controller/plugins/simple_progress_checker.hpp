@@ -60,6 +60,7 @@ protected:
   rclcpp::Clock::SharedPtr clock_;
 
   double radius_;
+  double required_angle_;
   rclcpp::Duration time_allowance_{0, 0};
 
   geometry_msgs::msg::Pose2D baseline_pose_;
