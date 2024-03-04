@@ -27,6 +27,8 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/VoxelGrid.msg"
   "msg/BehaviorTreeStatusChange.msg"
   "msg/BehaviorTreeLog.msg"
+  "msg/BehaviorTree.msg"
+  "msg/BehaviorTreeNode.msg"
   "msg/Particle.msg"
   "msg/ParticleCloud.msg"
   "msg/MissedWaypoint.msg"
