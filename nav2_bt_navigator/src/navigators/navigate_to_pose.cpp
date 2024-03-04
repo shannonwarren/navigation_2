@@ -50,6 +50,11 @@ NavigateToPoseNavigator::configure(
     "goal_pose",
     rclcpp::SystemDefaultsQoS(),
     std::bind(&NavigateToPoseNavigator::onGoalPoseReceived, this, std::placeholders::_1));
+
+  behavior_tree_publisher_ = node->create_publisher<nav2_msgs::msg::BehaviorTree>(
+    "~/navigate_to_pose/behavior_tree",
+    rclcpp::QoS(rclcpp::KeepLast(1)).transient_local().reliable());
+  behavior_tree_publisher_->on_activate();
   return true;
 }
 
@@ -81,6 +86,7 @@ NavigateToPoseNavigator::cleanup()
 {
   goal_sub_.reset();
   self_client_.reset();
+  behavior_tree_publisher_.reset();
   return true;
 }
 
@@ -97,7 +103,43 @@ NavigateToPoseNavigator::goalReceived(ActionT::Goal::ConstSharedPtr goal)
   }
 
   RCLCPP_INFO(logger_, "BT loaded: %s", bt_xml_filename.empty() ? default_bt_xml_filename_.c_str() : bt_xml_filename.c_str());
+  publishTree(bt_xml_filename.empty() ? default_bt_xml_filename_ : bt_xml_filename);
   return initializeGoalPose(goal);
+}
+
+void NavigateToPoseNavigator::publishTree(std::string& bt_xml_filename)
+{
+    const BT::TreeNode* root_node = bt_action_server_->getTree().rootNode();
+
+  auto behavior_tree_msg = std::make_shared<nav2_msgs::msg::BehaviorTree>();
+  behavior_tree_msg->name = bt_xml_filename;
+
+  std::function<void(unsigned, const BT::TreeNode*)> recursivePublish;
+
+  recursivePublish =
+    [this, &recursivePublish, &behavior_tree_msg](unsigned parent_uid, const BT::TreeNode* node) {
+      if (!node) {
+        return;
+      }
+
+      nav2_msgs::msg::BehaviorTreeNode node_msg;
+      node_msg.name = node->name();
+      node_msg.uid = node->UID();
+      node_msg.parent_uid = parent_uid;
+      behavior_tree_msg->nodes.emplace_back(node_msg);
+
+      if (const auto control = dynamic_cast<const BT::ControlNode*>(node)) {
+        for (const auto& child : control->children()) {
+          recursivePublish(node->UID(), child);
+        }
+      } else if (const auto decorator = dynamic_cast<const BT::DecoratorNode*>(node)) {
+        recursivePublish(node->UID(), decorator->child());
+      }
+    };
+
+  recursivePublish(0, root_node);
+
+  behavior_tree_publisher_->publish(*behavior_tree_msg);
 }
 
 void
