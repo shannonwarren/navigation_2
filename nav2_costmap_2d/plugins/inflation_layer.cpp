@@ -86,7 +86,6 @@ void
 InflationLayer::onInitialize()
 {
   declareParameter("enabled", rclcpp::ParameterValue(true));
-  declareParameter("inscribe", rclcpp::ParameterValue(true));
   declareParameter("inflation_radius", rclcpp::ParameterValue(0.55));
   declareParameter("cost_scaling_factor", rclcpp::ParameterValue(10.0));
   declareParameter("inflate_unknown", rclcpp::ParameterValue(false));
