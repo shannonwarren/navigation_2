@@ -28,8 +28,7 @@ public:
   using BackUpActionGoal = BackUpAction::Goal;
   using BackUpActionResult = BackUpAction::Result;
 
-  ResultStatus
-  onRun(const std::shared_ptr<const BackUpActionGoal> command) override;
+  ResultStatus onRun(const std::shared_ptr<const BackUpActionGoal> command) override;
 };
 
 } // namespace nav2_behaviors
