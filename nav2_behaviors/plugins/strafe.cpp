@@ -17,13 +17,13 @@
 namespace nav2_behaviors
 {
 
-Status Strafe::onRun(const std::shared_ptr<const StrafeAction::Goal> command)
+ResultStatus Strafe::onRun(const std::shared_ptr<const StrafeAction::Goal> command)
 {
   if (command->target.x != 0.0 || command->target.z != 0.0) {
     RCLCPP_INFO(
       logger_,
       "Strafing in y axis only");
-    return Status::FAILED;
+    return ResultStatus{Status::FAILED, StrafeActionResult::INVALID_INPUT};
   }
 
   // Silently ensure that both the speed and direction are negative.
@@ -31,28 +31,28 @@ Status Strafe::onRun(const std::shared_ptr<const StrafeAction::Goal> command)
   command_speed_ = command->speed;
   command_time_allowance_ = command->time_allowance;
 
-  end_time_ = steady_clock_.now() + command_time_allowance_;
+  end_time_ = this->clock_->now() + command_time_allowance_;
 
   if (!nav2_util::getCurrentPose(
       initial_pose_, *tf_, global_frame_, robot_base_frame_,
       transform_tolerance_))
   {
     RCLCPP_ERROR(logger_, "Initial robot pose is not available.");
-    return Status::FAILED;
+    return ResultStatus{Status::FAILED, StrafeActionResult::TF_ERROR};
   }
 
-  return Status::SUCCEEDED;
+  return ResultStatus{Status::SUCCEEDED, StrafeActionResult::NONE};
 }
 
-Status Strafe::onCycleUpdate()
+ResultStatus Strafe::onCycleUpdate()
 {
-    rclcpp::Duration time_remaining = end_time_ - this->steady_clock_.now();
+    rclcpp::Duration time_remaining = end_time_ - this->clock_->now();
     if (time_remaining.seconds() < 0.0 && command_time_allowance_.seconds() > 0.0) {
       this->stopRobot();
       RCLCPP_WARN(
         this->logger_,
         "Exceeded time allowance before reaching the DriveOnHeading goal - Exiting DriveOnHeading");
-      return Status::FAILED;
+      return ResultStatus{Status::FAILED, StrafeActionResult::NONE};
     }
 
     geometry_msgs::msg::PoseStamped current_pose;
@@ -61,7 +61,7 @@ Status Strafe::onCycleUpdate()
         this->transform_tolerance_))
     {
       RCLCPP_ERROR(this->logger_, "Current robot pose is not available.");
-      return Status::FAILED;
+      return ResultStatus{Status::FAILED, StrafeActionResult::TF_ERROR};
     }
 
     double diff_x = initial_pose_.pose.position.x - current_pose.pose.position.x;
@@ -73,13 +73,14 @@ Status Strafe::onCycleUpdate()
 
     if (distance >= std::fabs(command_x_)) {
       this->stopRobot();
-      return Status::SUCCEEDED;
+      return ResultStatus{Status::SUCCEEDED, StrafeActionResult::NONE};
     }
 
-    auto cmd_vel = std::make_unique<geometry_msgs::msg::Twist>();
-    cmd_vel->linear.x = 0.0;
-    cmd_vel->angular.z = 0.0;
-    cmd_vel->linear.y = command_speed_;
+    auto cmd_vel = std::make_unique<geometry_msgs::msg::TwistStamped>();
+    cmd_vel->header.stamp = clock_->now();
+    cmd_vel->twist.linear.x = 0.0;
+    cmd_vel->twist.angular.z = 0.0;
+    cmd_vel->twist.linear.y = command_speed_;
 
     geometry_msgs::msg::Pose2D pose2d;
     pose2d.x = current_pose.pose.position.x;
@@ -89,17 +90,17 @@ Status Strafe::onCycleUpdate()
     if (!isCollisionFree(distance, cmd_vel.get(), pose2d)) {
       this->stopRobot();
       RCLCPP_WARN(this->logger_, "Collision Ahead - Exiting Strafing");
-      return Status::FAILED;
+      return ResultStatus{Status::FAILED, StrafeActionResult::COLLISION_AHEAD};
     }
 
     this->vel_pub_->publish(std::move(cmd_vel));
 
-    return Status::RUNNING;
+    return ResultStatus{Status::RUNNING, StrafeActionResult::NONE};
   }
 
 bool Strafe::isCollisionFree(
     const double & distance,
-    geometry_msgs::msg::Twist * cmd_vel,
+    geometry_msgs::msg::TwistStamped * cmd_vel,
     geometry_msgs::msg::Pose2D & pose2d)
   {
     // Simulate ahead by simulate_ahead_time_ in this->cycle_frequency_ increments
@@ -111,7 +112,7 @@ bool Strafe::isCollisionFree(
     bool fetch_data = true;
 
     while (cycle_count < max_cycle_count) {
-      sim_position_change = cmd_vel->linear.y * (cycle_count / this->cycle_frequency_);
+      sim_position_change = cmd_vel->twist.linear.y * (cycle_count / this->cycle_frequency_);
       pose2d.x = init_pose.x + sim_position_change * cos(init_pose.theta);
       pose2d.y = init_pose.y + sim_position_change * sin(init_pose.theta);
       cycle_count++;
@@ -120,7 +121,7 @@ bool Strafe::isCollisionFree(
         break;
       }
 
-      if (!this->collision_checker_->isCollisionFree(pose2d, fetch_data)) {
+      if (!this->local_collision_checker_->isCollisionFree(pose2d, fetch_data)) {
         return false;
       }
       fetch_data = false;

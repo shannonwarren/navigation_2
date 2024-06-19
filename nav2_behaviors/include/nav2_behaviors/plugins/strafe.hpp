@@ -20,15 +20,15 @@
 #include "drive_on_heading.hpp"
 #include "nav2_msgs/action/strafe.hpp"
 
-using StrafeAction= nav2_msgs::action::Strafe;
+using StrafeAction = nav2_msgs::action::Strafe;
 
-namespace nav2_behaviors
-{
-class Strafe: public DriveOnHeading<nav2_msgs::action::Strafe>
-{
+namespace nav2_behaviors {
+class Strafe : public DriveOnHeading<nav2_msgs::action::Strafe> {
 public:
-  Status onRun(const std::shared_ptr<const StrafeAction::Goal> command) override;
-  Status onCycleUpdate() override;
+  ResultStatus onRun(const std::shared_ptr<const StrafeAction::Goal> command) override;
+  ResultStatus onCycleUpdate() override;
+
+  using StrafeActionResult = StrafeAction::Result;
 
 protected:
   /**
@@ -38,12 +38,10 @@ protected:
    * @param pose2d Current pose
    * @return is collision free or not
    */
-  bool isCollisionFree(
-    const double & distance,
-    geometry_msgs::msg::Twist * cmd_vel,
-    geometry_msgs::msg::Pose2D & pose2d);
-
+  bool isCollisionFree(const double &distance,
+                       geometry_msgs::msg::TwistStamped *cmd_vel,
+                       geometry_msgs::msg::Pose2D &pose2d);
 };
-}
+} // namespace nav2_behaviors
 
-#endif  // NAV2_BEHAVIORS__PLUGINS__STRAFE_HPP_
+#endif // NAV2_BEHAVIORS__PLUGINS__STRAFE_HPP_

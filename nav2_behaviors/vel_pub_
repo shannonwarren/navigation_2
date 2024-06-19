@@ -1,0 +1,45 @@
+plugins/strafe.cpp:34:  end_time_ = this->clock_->now() + command_time_allowance_;
+plugins/strafe.cpp:49:    rclcpp::Duration time_remaining = end_time_ - this->clock_->now();
+plugins/strafe.cpp:51:      this->stopRobot();
+plugins/strafe.cpp:53:        this->logger_,
+plugins/strafe.cpp:60:        current_pose, *this->tf_, this->global_frame_, this->robot_base_frame_,
+plugins/strafe.cpp:61:        this->transform_tolerance_))
+plugins/strafe.cpp:63:      RCLCPP_ERROR(this->logger_, "Current robot pose is not available.");
+plugins/strafe.cpp:72:    this->action_server_->publish_feedback(feedback_);
+plugins/strafe.cpp:75:      this->stopRobot();
+plugins/strafe.cpp:90:      this->stopRobot();
+plugins/strafe.cpp:91:      RCLCPP_WARN(this->logger_, "Collision Ahead - Exiting Strafing");
+plugins/strafe.cpp:95:    this->vel_pub_->publish(std::move(cmd_vel));
+plugins/strafe.cpp:105:    // Simulate ahead by simulate_ahead_time_ in this->cycle_frequency_ increments
+plugins/strafe.cpp:109:    const int max_cycle_count = static_cast<int>(this->cycle_frequency_ * simulate_ahead_time_);
+plugins/strafe.cpp:114:      sim_position_change = cmd_vel->linear.y * (cycle_count / this->cycle_frequency_);
+plugins/strafe.cpp:123:      if (!this->collision_checker_->isCollisionFree(pose2d, fetch_data)) {
+plugins/assisted_teleop.cpp:73:  end_time_ = this->clock_->now() + command_time_allowance_;
+plugins/assisted_teleop.cpp:88:  rclcpp::Duration time_remaining = end_time_ - this->clock_->now();
+plugins/spin.cpp:94:  end_time_ = this->clock_->now() + command_time_allowance_;
+plugins/spin.cpp:101:  rclcpp::Duration time_remaining = end_time_ - this->clock_->now();
+plugins/back_up.cpp:34:  end_time_ = this->clock_->now() + command_time_allowance_;
+include/nav2_behaviors/plugins/drive_on_heading.hpp:65:        this->logger_,
+include/nav2_behaviors/plugins/drive_on_heading.hpp:72:      RCLCPP_ERROR(this->logger_, "Speed and command sign did not match");
+include/nav2_behaviors/plugins/drive_on_heading.hpp:80:    end_time_ = this->clock_->now() + command_time_allowance_;
+include/nav2_behaviors/plugins/drive_on_heading.hpp:83:        initial_pose_, *this->tf_, this->local_frame_, this->robot_base_frame_,
+include/nav2_behaviors/plugins/drive_on_heading.hpp:84:        this->transform_tolerance_))
+include/nav2_behaviors/plugins/drive_on_heading.hpp:86:      RCLCPP_ERROR(this->logger_, "Initial robot pose is not available.");
+include/nav2_behaviors/plugins/drive_on_heading.hpp:99:    rclcpp::Duration time_remaining = end_time_ - this->clock_->now();
+include/nav2_behaviors/plugins/drive_on_heading.hpp:101:      this->stopRobot();
+include/nav2_behaviors/plugins/drive_on_heading.hpp:103:        this->logger_,
+include/nav2_behaviors/plugins/drive_on_heading.hpp:110:        current_pose, *this->tf_, this->local_frame_, this->robot_base_frame_,
+include/nav2_behaviors/plugins/drive_on_heading.hpp:111:        this->transform_tolerance_))
+include/nav2_behaviors/plugins/drive_on_heading.hpp:113:      RCLCPP_ERROR(this->logger_, "Current robot pose is not available.");
+include/nav2_behaviors/plugins/drive_on_heading.hpp:122:    this->action_server_->publish_feedback(feedback_);
+include/nav2_behaviors/plugins/drive_on_heading.hpp:125:      this->stopRobot();
+include/nav2_behaviors/plugins/drive_on_heading.hpp:130:    cmd_vel->header.stamp = this->clock_->now();
+include/nav2_behaviors/plugins/drive_on_heading.hpp:131:    cmd_vel->header.frame_id = this->robot_base_frame_;
+include/nav2_behaviors/plugins/drive_on_heading.hpp:142:      this->stopRobot();
+include/nav2_behaviors/plugins/drive_on_heading.hpp:143:      RCLCPP_WARN(this->logger_, "Collision Ahead - Exiting DriveOnHeading");
+include/nav2_behaviors/plugins/drive_on_heading.hpp:147:    this->vel_pub_->publish(std::move(cmd_vel));
+include/nav2_behaviors/plugins/drive_on_heading.hpp:171:    // Simulate ahead by simulate_ahead_time_ in this->cycle_frequency_ increments
+include/nav2_behaviors/plugins/drive_on_heading.hpp:175:    const int max_cycle_count = static_cast<int>(this->cycle_frequency_ * simulate_ahead_time_);
+include/nav2_behaviors/plugins/drive_on_heading.hpp:180:      sim_position_change = cmd_vel.linear.x * (cycle_count / this->cycle_frequency_);
+include/nav2_behaviors/plugins/drive_on_heading.hpp:189:      if (!this->local_collision_checker_->isCollisionFree(pose2d, fetch_data)) {
+include/nav2_behaviors/plugins/drive_on_heading.hpp:202:    auto node = this->node_.lock();
